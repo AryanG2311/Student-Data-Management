@@ -5,7 +5,7 @@ import DashboardClient from "@/components/DashboardClient";
 // Set to true to utilize Python FastAPI backend on port 8000
 // Set to false for default client-side cleaner.js utility
 // ==========================================
-const USE_PYTHON_BACKEND = true;
+const USE_PYTHON_BACKEND = false;
 
 export default async function Page({ searchParams }) {
   // Resolves the searchParams Promise in Next.js 15+ / Next.js 16 App Router
