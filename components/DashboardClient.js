@@ -7,6 +7,8 @@ import FileDropzone from './FileDropzone';
 import MetricCards from './MetricCards';
 import FilterControls from './FilterControls';
 import StudentTable from './StudentTable';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export default function DashboardClient({ sessionId, usePythonBackend }) {
   const [students, setStudents] = useState([]);
@@ -235,6 +237,56 @@ export default function DashboardClient({ sessionId, usePythonBackend }) {
     setStatusMessage({ type: 'success', text: 'Clean filtered shortlist downloaded successfully.' });
   };
 
+  // export active filtered shortlist as formatted PDF
+  const handleExportPDF = () => {
+    if (filteredShortlist.length === 0) {
+      setStatusMessage({ type: 'error', text: 'Shortlist is empty. Add candidates or adjust filters to export.' });
+      return;
+    }
+
+    try {
+      const doc = new jsPDF();
+      
+      // title text
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.text('DELHI TECHNOLOGICAL UNIVERSITY', 14, 20);
+      
+      doc.setFontSize(10);
+      doc.setFont('Helvetica', 'normal');
+      doc.text(`Session Report: ${sessionName || 'Student Assessor'}`, 14, 27);
+      doc.text(`Min score requirements: Math >= ${minMath}, Science >= ${minScience}, English >= ${minEnglish}, Total >= ${minScore}`, 14, 33);
+      doc.text(`Total candidates shortlisted: ${filteredShortlist.length}`, 14, 39);
+
+      const tableColumn = ["S.No.", "Name", "Gender", "Grade", "Math", "Science", "English", "Total"];
+      const tableRows = filteredShortlist.map(s => [
+        s.recordId,
+        s.name,
+        s.gender,
+        s.grade,
+        s.math,
+        s.science,
+        s.english,
+        s.total
+      ]);
+
+      autoTable(doc, {
+        head: [tableColumn],
+        body: tableRows,
+        startY: 45,
+        theme: 'striped',
+        headStyles: { fillColor: [15, 23, 42] },
+        styles: { fontSize: 9 }
+      });
+
+      doc.save(`${sessionName.replace(/\s+/g, "_") || 'student'}_shortlist.pdf`);
+      setStatusMessage({ type: 'success', text: 'Clean filtered shortlist PDF downloaded successfully.' });
+    } catch (err) {
+      console.error(err);
+      setStatusMessage({ type: 'error', text: `Failed to export PDF: ${err.message}` });
+    }
+  };
+
   // compose filters list reactively
   const filteredList = students.filter(s => {
     const matchesSearch = s.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -318,6 +370,7 @@ export default function DashboardClient({ sessionId, usePythonBackend }) {
           currentSessionId={currentSessionId}
           handleSaveSession={handleSaveSession}
           handleExportCSV={handleExportCSV}
+          handleExportPDF={handleExportPDF}
           resetSession={resetSession}
         />
       )}

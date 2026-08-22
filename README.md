@@ -65,6 +65,7 @@ graph TD
 *   **📊 Live metrics grid**: Floating dashboards displaying total loaded, active shortlist, debarred count, and calculated average scores.
 *   **💾 Database Hydration**: Save, overwrite, or delete sessions locally and pull states back from your remote MongoDB Atlas history.
 *   **📥 Custom CSV Exporter**: Download standard CSV files containing the current cleaned shortlisted candidate records.
+*   **📄 Structured PDF Exporter**: Generate and download professional PDF reports of the active shortlist candidates, automatically formatted with DTU branding, current threshold requirements, and average scores using `jspdf`.
 
 ### 📊 Engine Comparison
 
