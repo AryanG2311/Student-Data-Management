@@ -16,36 +16,26 @@ app.add_middleware(
 )
 
 def normalize_gender(val):
-    if pd.isna(val) or not str(val).strip():
+    if not val or pd.isna(val):
         return "Unknown"
     s = str(val).strip().lower()
     if s.startswith('m'):
         return "Male"
-    elif s.startswith('f'):
+    if s.startswith('f'):
         return "Female"
-    else:
-        return "Unknown"
+    return "Unknown"
 
 def clean_grade(val):
-    if pd.isna(val) or not str(val).strip():
+    if not val or pd.isna(val):
         return 0
-    s = str(val).strip()
-    # Find all digit sequences
-    matches = re.findall(r'\d+', s)
-    if not matches:
-        return 0
-    # Take the last sequence of digits (handles noise like "0 Grade 11" -> 11)
-    return int(matches[-1])
+    matches = re.findall(r'\d+', str(val))
+    return int(matches[-1]) if matches else 0
 
 def clean_score(val):
-    if pd.isna(val) or not str(val).strip():
+    if not val or pd.isna(val):
         return 0.0
-    s = str(val).strip()
-    # Match integer or float
-    match = re.search(r'\d+(?:\.\d+)?', s)
-    if match:
-        return float(match.group(0))
-    return 0.0
+    match = re.search(r'\d+(?:\.\d+)?', str(val))
+    return float(match.group(0)) if match else 0.0
 
 @app.post("/clean")
 async def clean_csv(file: UploadFile = File(...)):
@@ -82,25 +72,25 @@ async def clean_csv(file: UploadFile = File(...)):
         if col not in df.columns:
             df[col] = ""
             
-    # Apply identical cleaning rules
-    # 1. Name Standardization: strip quotes, apostrophes, title case
+    # clean candidate fields
+    # format names
     df['name'] = df['name'].astype(str).str.replace(r'[\'"]', '', regex=True).str.strip().str.title()
     
-    # 2. Gender Normalization
+    # normalize gender
     df['gender'] = df['gender'].apply(normalize_gender)
     
-    # 3. Grade Extraction (last sequence of digits)
+    # extract grade integer
     df['grade'] = df['grade'].apply(clean_grade)
     
-    # 4. Subject Scores Extraction
+    # parse subject scores
     df['math'] = df['math'].apply(clean_score)
     df['science'] = df['science'].apply(clean_score)
     df['english'] = df['english'].apply(clean_score)
     
-    # 5. Strictly Recalculate Total
+    # sum score total
     df['total'] = df['math'] + df['science'] + df['english']
     
-    # 6. Add isDebarred default state
+    # set default debarred state
     df['isDebarred'] = False
     
     # Keep only target columns and export
