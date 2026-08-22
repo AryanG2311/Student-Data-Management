@@ -59,11 +59,11 @@ export default function NavigationLayout({ children }) {
         <div className="border-t border-slate-200 p-4 bg-slate-50/50">
           <div className="flex items-center gap-3 px-1 py-1">
             <div className="h-8 w-8 rounded-md bg-slate-900 flex items-center justify-center text-white font-bold text-xs shadow-sm">
-              RE
+              AG
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-900">Recruitment Assessor</p>
-              <p className="text-[10px] text-slate-500 font-medium">Evaluation Platform</p>
+              <p className="text-xs font-semibold text-slate-900">Aryan Goel</p>
+              <p className="text-[10px] text-slate-500 font-medium">Roll No: 24/CS/107</p>
             </div>
           </div>
         </div>
