@@ -14,7 +14,7 @@
   <h4>
     <a href="https://rm-selection-board.vercel.app/">🚀 Live Platform Deployment</a>
     <span> · </span>
-    <a href="#-video-walkthrough">📹 Video Walkthrough</a>
+    <a href="https://drive.google.com/file/d/1S6Qqwho8OAEmq0LN54_SpWn7bsQ1uRpu/view?usp=sharing">📹 Video Walkthrough</a>
   </h4>
 </div>
 
