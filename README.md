@@ -28,7 +28,7 @@
 Click the thumbnail below to watch a 90-second video demonstrating the data ingestion, real-time filtering, session persistence, and export functions:
 
 <div align="center">
-  <a href="https://rm-selection-board.vercel.app/"><img src="https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg" alt="Student Data Pipeline Video Demo" width="600" style="border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);" /></a>
+  <a href="https://drive.google.com/file/d/1S6Qqwho8OAEmq0LN54_SpWn7bsQ1uRpu/view?pli=1"><img src="https://cdn.discordapp.com/attachments/1449799993446629396/1540988114640707614/Screenshot_2026-08-23_130411.png?ex=6a8bf484&is=6a8aa304&hm=ce9ec7665b708ae80ee30bbaf9ace55b1db5bae59b179abccf80ca738f65e196&" alt="Student Data Pipeline Video Demo" width="600" style="border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);" /></a>
 </div>
 
 ---
