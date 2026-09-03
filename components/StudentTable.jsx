@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, AlertCircle } from 'lucide-react';
+import { ChevronDown, AlertCircle, AlertTriangle } from 'lucide-react';
 
 export default function StudentTable({
   visibleStudents,
@@ -9,6 +9,7 @@ export default function StudentTable({
   filteredShortlist,
   students,
   debarredCount,
+  flaggedCount = 0,
   minScore,
   visibleCount,
   setVisibleCount,
@@ -57,6 +58,17 @@ export default function StudentTable({
           >
             Debarred Only ({debarredCount})
           </button>
+          <button
+            onClick={() => setViewMode('flagged')}
+            className={`px-3 py-1 rounded-md transition duration-150 cursor-pointer flex items-center gap-1.5 ${
+              viewMode === 'flagged' 
+                ? 'bg-amber-600 text-white shadow-sm' 
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <AlertTriangle className="h-3 w-3" />
+            Needs Review ({flaggedCount})
+          </button>
         </div>
       </div>
 
@@ -99,7 +111,21 @@ export default function StudentTable({
                   </td>
                   {/* gender */}
                   <td className="px-4 py-2 font-medium">
-                    {student.gender}
+                    {student.gender === 'Unknown' ? (
+                      <span 
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded cursor-help"
+                        title={
+                          student.rawGender 
+                            ? `Original entry provided: "${student.rawGender}" (Unrecognized format)` 
+                            : "Original entry was missing or empty"
+                        }
+                      >
+                        <AlertTriangle className="h-3 w-3 text-amber-500 shrink-0" />
+                        Unknown
+                      </span>
+                    ) : (
+                      student.gender
+                    )}
                   </td>
                   {/* grade */}
                   <td className="px-4 py-2 text-slate-600">
@@ -123,15 +149,26 @@ export default function StudentTable({
                   </td>
                   {/* status badge */}
                   <td className="px-4 py-2">
-                    {student.isDebarred ? (
-                      <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10 shadow-sm animate-pulse">
-                        Debarred
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20 shadow-sm">
-                        Active
-                      </span>
-                    )}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {student.isDebarred ? (
+                        <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10 shadow-sm animate-pulse">
+                          Debarred
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20 shadow-sm">
+                          Active
+                        </span>
+                      )}
+                      {student.hasWarning && (
+                        <span 
+                          className="inline-flex items-center gap-1 rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-800 ring-1 ring-inset ring-amber-600/20 cursor-help"
+                          title={student.warnings?.join(' • ') || 'Data Quality Warning'}
+                        >
+                          <AlertTriangle className="h-2.5 w-2.5 text-amber-600" />
+                          Review
+                        </span>
+                      )}
+                    </div>
                   </td>
                   {/* debar action checkbox */}
                   <td className="px-4 py-2 text-center">

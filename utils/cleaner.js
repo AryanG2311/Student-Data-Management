@@ -42,12 +42,26 @@ export function cleanCSV(csvString) {
         .replace(/\b\w/g, (char) => char.toUpperCase());
     }
 
-    // normalize gender
+    // capture raw gender entry for audit & hover tooltips
+    const rawGender = normalizedRow.gender !== undefined && normalizedRow.gender !== null
+      ? String(normalizedRow.gender).trim()
+      : '';
+
+    // normalize gender with strict token matching
     let gender = 'Unknown';
-    if (normalizedRow.gender) {
-      const gStr = String(normalizedRow.gender).trim().toLowerCase();
-      if (gStr.startsWith('m')) gender = 'Male';
-      if (gStr.startsWith('f')) gender = 'Female';
+    if (rawGender) {
+      const gStr = rawGender
+        .replace(/['"]/g, '')
+        .trim()
+        .toLowerCase();
+
+      if (/^(m|male|man|boy)$/i.test(gStr)) {
+        gender = 'Male';
+      } else if (/^(f|female|woman|girl)$/i.test(gStr)) {
+        gender = 'Female';
+      } else {
+        gender = 'Unknown';
+      }
     }
 
     // extract grade integer
@@ -73,18 +87,36 @@ export function cleanCSV(csvString) {
     // sum score total
     const total = math + science + english;
 
-    // set default debarred state
+    // detect data quality warnings / anomalies (non-destructive review flags)
+    const warnings = [];
+    if (gender === 'Unknown') {
+      warnings.push(rawGender ? `Unknown Gender (Entered: "${rawGender}")` : 'Missing Gender Entry');
+    }
+    if (grade === 0) {
+      warnings.push('Missing / Unresolved Grade');
+    }
+    if (!name || name.toLowerCase() === 'unknown' || name.trim() === '') {
+      warnings.push('Missing Candidate Name');
+    }
+    if (total === 0) {
+      warnings.push('Zero Total Score');
+    }
+
+    const hasWarning = warnings.length > 0;
     const isDebarred = false;
 
     return {
       name,
       gender,
+      rawGender,
       grade,
       math,
       science,
       english,
       total,
       isDebarred,
+      hasWarning,
+      warnings,
     };
   });
 }

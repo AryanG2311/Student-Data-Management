@@ -33,11 +33,23 @@ export default function DashboardClient({ sessionId, usePythonBackend }) {
   // assign sequential record number and stable client-side key
   const ensureUniqueIds = (data) => {
     if (!data) return [];
-    return data.map((s, idx) => ({
-      ...s,
-      id: s.id || s._id || `std-${idx}-${Math.random().toString(36).substring(2, 9)}`,
-      recordId: s.recordId || idx + 1
-    }));
+    return data.map((s, idx) => {
+      const warnings = Array.isArray(s.warnings) ? [...s.warnings] : [];
+      if (warnings.length === 0) {
+        if (s.gender === 'Unknown') warnings.push('Unknown / Ambiguous Gender');
+        if (s.grade === 0) warnings.push('Missing / Unresolved Grade');
+        if (!s.name || s.name.toLowerCase() === 'unknown' || s.name.trim() === '') warnings.push('Missing Candidate Name');
+        if (s.total === 0) warnings.push('Zero Total Score');
+      }
+      return {
+        ...s,
+        id: s.id || s._id || `std-${idx}-${Math.random().toString(36).substring(2, 9)}`,
+        recordId: s.recordId || idx + 1,
+        rawGender: s.rawGender !== undefined ? s.rawGender : (s.gender === 'Unknown' ? '' : s.gender),
+        hasWarning: s.hasWarning !== undefined ? s.hasWarning : warnings.length > 0,
+        warnings,
+      };
+    });
   };
 
   // load saved session state if id exists in search queries
@@ -304,6 +316,8 @@ export default function DashboardClient({ sessionId, usePythonBackend }) {
     listToRender = filteredShortlist;
   } else if (viewMode === 'debarred') {
     listToRender = filteredList.filter(s => s.isDebarred);
+  } else if (viewMode === 'flagged') {
+    listToRender = filteredList.filter(s => s.hasWarning);
   } else {
     listToRender = filteredList;
   }
@@ -314,6 +328,7 @@ export default function DashboardClient({ sessionId, usePythonBackend }) {
   const totalLoaded = students.length;
   const activeCandidatesCount = students.filter(s => !s.isDebarred).length;
   const debarredCount = students.filter(s => s.isDebarred).length;
+  const flaggedCount = students.filter(s => s.hasWarning).length;
   
   const averageScore = filteredShortlist.length > 0 
     ? (filteredShortlist.reduce((sum, s) => sum + s.total, 0) / filteredShortlist.length).toFixed(2)
@@ -393,6 +408,7 @@ export default function DashboardClient({ sessionId, usePythonBackend }) {
           totalLoaded={totalLoaded}
           activeCandidatesCount={activeCandidatesCount}
           debarredCount={debarredCount}
+          flaggedCount={flaggedCount}
           averageScore={averageScore}
         />
       )}
@@ -407,6 +423,7 @@ export default function DashboardClient({ sessionId, usePythonBackend }) {
           filteredShortlist={filteredShortlist}
           students={students}
           debarredCount={debarredCount}
+          flaggedCount={flaggedCount}
           minScore={minScore}
           visibleCount={visibleCount}
           setVisibleCount={setVisibleCount}

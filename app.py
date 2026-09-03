@@ -18,10 +18,10 @@ app.add_middleware(
 def normalize_gender(val):
     if not val or pd.isna(val):
         return "Unknown"
-    s = str(val).strip().lower()
-    if s.startswith('m'):
+    s = re.sub(r"['\"]", "", str(val)).strip().lower()
+    if s in ["m", "male", "man", "boy"]:
         return "Male"
-    if s.startswith('f'):
+    if s in ["f", "female", "woman", "girl"]:
         return "Female"
     return "Unknown"
 
@@ -76,8 +76,11 @@ async def clean_csv(file: UploadFile = File(...)):
     # format names
     df['name'] = df['name'].astype(str).str.replace(r'[\'"]', '', regex=True).str.strip().str.title()
     
+    # capture raw gender before normalizing
+    df['rawGender'] = df['gender'].astype(str).str.strip()
+
     # normalize gender
-    df['gender'] = df['gender'].apply(normalize_gender)
+    df['gender'] = df['rawGender'].apply(normalize_gender)
     
     # extract grade integer
     df['grade'] = df['grade'].apply(clean_grade)
@@ -94,7 +97,7 @@ async def clean_csv(file: UploadFile = File(...)):
     df['isDebarred'] = False
     
     # Keep only target columns and export
-    target_cols = ['name', 'gender', 'grade', 'math', 'science', 'english', 'total', 'isDebarred']
+    target_cols = ['name', 'gender', 'rawGender', 'grade', 'math', 'science', 'english', 'total', 'isDebarred']
     cleaned_data = df[target_cols].to_dict(orient='records')
     
     return cleaned_data

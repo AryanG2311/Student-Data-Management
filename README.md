@@ -66,6 +66,7 @@ graph TD
 *   **💾 Database Hydration**: Save, overwrite, or delete sessions locally and pull states back from your remote MongoDB Atlas history.
 *   **📥 Custom CSV Exporter**: Download standard CSV files containing the current cleaned shortlisted candidate records.
 *   **📄 Structured PDF Exporter**: Generate and download professional PDF reports of the active shortlist candidates, automatically formatted with DTU branding, current threshold requirements, and average scores using `jspdf`.
+*   **⚠️ Data Quality Warnings & Review Filter**: Automatically identifies ambiguous or anomalous entries (e.g. unknown gender, unparseable grades, missing marks) with non-destructive soft warnings and a dedicated **Needs Review** filter tab.
 
 ### 📊 Engine Comparison
 
@@ -106,11 +107,12 @@ Strips quotes, trims padding spaces, and converts names to Title Case:
 * **Capitalizer Pattern**: First letter of each word is converted using `/\b\w/g`.
 * *Example*: `'"rohan sharma"'` $\rightarrow$ `'Rohan Sharma'`.
 
-### 🚻 Step 3: Gender Normalization
-Maps varied abbreviations into clean categories, filtering out numeric noise:
-* **Mapping**: Prefix `m`/`M` resolves to `'Male'`, and `f`/`F` to `'Female'`.
-* **Fallback**: All other inputs (e.g. `0` or empty) resolve to `'Unknown'`.
-* *Example*: `'female  '` $\rightarrow$ `'Female'`.
+### 🚻 Step 3: Strict Gender Token Normalization
+Standardizes gender entries using strict token-boundary matching to prevent false positives from noisy strings (e.g. `'mfale'` or `'false'`):
+* **Male Patterns**: Matches `/^(m|male|man|boy)$/i` $\rightarrow$ `'Male'`.
+* **Female Patterns**: Matches `/^(f|female|woman|girl)$/i` $\rightarrow$ `'Female'`.
+* **Anomaly Detection**: Any unrecognized or ambiguous value (e.g. `'mfale'`, `'0'`, or empty) resolves to `'Unknown'` and is tagged with a non-destructive Data Quality Warning for coordinator review.
+* *Example*: `'female  '` $\rightarrow$ `'Female'`, `'mfale'` $\rightarrow$ `'Unknown' (Flagged)`.
 
 ### 🏫 Step 4: Grade Extraction (Regex Last Sequence Match)
 Parses grade numbers out of text descriptions:

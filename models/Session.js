@@ -9,6 +9,9 @@ const StudentSchema = new mongoose.Schema({
   english: { type: Number, default: 0 },
   total: { type: Number, default: 0 },
   isDebarred: { type: Boolean, default: false },
+  hasWarning: { type: Boolean, default: false },
+  warnings: [{ type: String }],
+  rawGender: { type: String, default: '' },
   recordId: { type: Number }
 });
 
